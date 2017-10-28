@@ -34,9 +34,6 @@ public class AddBoard extends AppCompatActivity {
     BoardHelper oBoardHelper = new BoardHelper(this);
     LadderHelper oLadderHelper = new LadderHelper(this);
     SnakeHelper oSnakeHelper = new SnakeHelper(this);
-    RequestQueue queue = Volley.newRequestQueue(this);
-    String id = "";
-    JSONObject jBoard = new JSONObject();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +43,7 @@ public class AddBoard extends AppCompatActivity {
         Button btnAddLadder = (Button) findViewById(R.id.btnAddLadder);
         Button btnAddSnake = (Button) findViewById(R.id.btnAddSnake);
         Button btnAddBoard = (Button) findViewById(R.id.btnAddBoard);
+        final RequestQueue queue = Volley.newRequestQueue(this);
 
         btnAddLadder.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -132,22 +130,14 @@ public class AddBoard extends AppCompatActivity {
                     oBoard.setName(name);
                     oBoard.setAuthor(author);
 
-                    parseBoardToJSONObject(oBoard);
-
-                    JSONObject jObject = new JSONObject();
-                    try {
-                        jObject.put("name", name);
-                    } catch (Exception e) {
-
-                    }
+                    JSONObject jObject = parseBoardToJSONObject(oBoard);
 
                     JsonObjectRequest jsonPostRequest = new JsonObjectRequest
                             (Request.Method.POST, "http://107.170.247.123:2403/snakes-ladders", jObject, new Response.Listener<JSONObject>() {
                                 @Override
                                 public void onResponse(JSONObject response) {
                                     try {
-                                        id = response.getString("id");
-
+                                        Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_SHORT);
                                     } catch (Exception e) {
                                     }
                                 }
@@ -159,24 +149,6 @@ public class AddBoard extends AppCompatActivity {
                             });
 
                     queue.add(jsonPostRequest);
-
-                    JsonObjectRequest realJsonPostRequest = new JsonObjectRequest
-                            (Request.Method.POST, "http://107.170.247.123:2403/snakes-ladders", jObject, new Response.Listener<JSONObject>() {
-                                @Override
-                                public void onResponse(JSONObject response) {
-                                    try{
-                                       Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_SHORT);
-                                    } catch (Exception e) {
-                                    }
-                                }
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_SHORT).show();
-                                }
-                            });
-
-                    queue.add(realJsonPostRequest);
                 }
             }
         });
@@ -191,7 +163,7 @@ public class AddBoard extends AppCompatActivity {
         }
     }
 
-    private void parseBoardToJSONObject (Board oBoard) {
+    private JSONObject parseBoardToJSONObject (Board oBoard) {
         JSONObject jObject = new JSONObject();
         JSONArray jLadders = new JSONArray();
         JSONArray jSnakes = new JSONArray();
@@ -227,6 +199,7 @@ public class AddBoard extends AppCompatActivity {
         }catch (JSONException e){
 
         }
-        jBoard = jObject;
+
+        return jObject;
     }
 }
